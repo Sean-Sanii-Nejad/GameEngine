@@ -61,3 +61,12 @@
 #*.PDF   diff=astextplain
 #*.rtf   diff=astextplain
 #*.RTF   diff=astextplain
+
+# Tell GitHub Linguist to treat all C++ code correctly
+*.cpp linguist-language=C++
+*.hpp linguist-language=C++
+*.h   linguist-language=C++
+
+# Ignore HTML files for language stats (if they're just examples or assets)
+*.html linguist-detectable=false
+
