@@ -10,16 +10,29 @@ add_subdirectory(libs/glfw)
 add_library(glad STATIC libs/glad/src/glad.c)
 target_include_directories(glad PUBLIC libs/glad/include)
 
-# Your executable
-add_executable(GameEngine src/main.cpp)
+# Your executable (GameEngine)
+add_executable(GameEngine
+    src/main.cpp
+    src/graphics/Shader.cpp
+)
 
+# Include directories for the main project
 target_include_directories(GameEngine
     PUBLIC
+    include            # for Shader.h
     libs/glad/include
     libs/glfw/include
 )
 
+# Link libraries
 target_link_libraries(GameEngine
     glad
     glfw
 )
+# Copy shaders to output directory
+file(GLOB SHADERS "shaders/*.vert" "shaders/*.frag")
+
+foreach(SHADER ${SHADERS})
+    configure_file(${SHADER} ${CMAKE_CURRENT_BINARY_DIR}/shaders/ COPYONLY)
+endforeach()
+
