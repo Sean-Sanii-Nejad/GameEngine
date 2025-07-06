@@ -70,3 +70,8 @@
 # Ignore HTML files for language stats (if they're just examples or assets)
 *.html linguist-detectable=false
 
+*.vert linguist-language=GLSL
+*.frag linguist-language=GLSL
+*.glsl linguist-language=GLSL
+
+
