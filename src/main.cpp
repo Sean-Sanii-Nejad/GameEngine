@@ -14,6 +14,10 @@ float vertices[] = {
 };
 
 
+/*
+ * Takes in aPos and aColor
+ * Outputs a screen-space position and forwards the color to the fragment shader.
+ */
 
 const char* vertexShaderSource = R"(
 #version 460 core
@@ -28,6 +32,9 @@ void main() {
 }
 )";
 
+/*
+ * Takes the interpolated color from the vertex shader and paints each pixel.
+ */
 const char* fragmentShaderSource = R"(
 #version 460 core
 in vec3 ourColor;
@@ -37,6 +44,67 @@ void main() {
     FragColor = vec4(ourColor, 1.0);
 }
 )";
+
+/*
+ * Initialises VAO and VBO for a triangle with position and colour attributes.
+ * Vertex format: [x, y, z, r, g, b]. Returns the VAO ID.
+ */
+
+unsigned int createTriangleVAO(float* vertices, size_t dataSize)
+{
+	unsigned int VAO, VBO; // Generate Unique IDs for Vertex Array Object (VAO) and Vertex Buffer Object (VBO) 
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+
+    // bind VAO
+	glBindVertexArray(VAO); // bind VAO (how to interpret the data)
+	glBindBuffer(GL_ARRAY_BUFFER, VBO); // bind VBO (where the data is stored)
+	glBufferData(GL_ARRAY_BUFFER, dataSize, vertices, GL_STATIC_DRAW); // Upload vertex data to the GPU
+
+    // Position attribute (location = 0)
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0); // 3 floats per vertex (x, y, z)
+    glEnableVertexAttribArray(0);
+
+    // Color attribute (location = 1)
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float))); // 3 floats per color (r, g, b)
+    glEnableVertexAttribArray(1);
+
+	// unbind VAO and VBO
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    return VAO;
+}
+
+/*
+ * Complies and links a vertex and fragment shader into a shader program.
+ * Returns the shader program ID.
+ */
+
+unsigned int createShaderProgram(const char* vertexSrc, const char* fragmentSrc) {
+    // Vertex Shader
+    unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShader, 1, &vertexSrc, nullptr);
+    glCompileShader(vertexShader);
+
+    // Fragment Shader
+    unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader, 1, &fragmentSrc, nullptr);
+    glCompileShader(fragmentShader);
+
+    // Shader Program
+    unsigned int shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    glLinkProgram(shaderProgram);
+
+    // Cleanup
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+
+    return shaderProgram;
+}
+
 
 int main() {
 
@@ -67,49 +135,9 @@ int main() {
 	glViewport(0, 0, 800, 600); // Set the initial viewport size
 
 
+    unsigned int triangleVAO = createTriangleVAO(vertices, sizeof(vertices));
+	unsigned int shaderProgram = createShaderProgram(vertexShaderSource, fragmentShaderSource);
 
-    unsigned int VAO, VBO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-
-    // bind VAO
-    glBindVertexArray(VAO);
-
-    // bind VBO
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    // Position attribute (location = 0)
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    // Color attribute (location = 1)
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    // unbind
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-
-    // Vertex Shader
-    unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
-    glCompileShader(vertexShader);
-
-    // Fragment Shader
-    unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
-    glCompileShader(fragmentShader);
-
-    // Shader Program
-    unsigned int shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-
-    // cleanup shaders (no longer needed after linking)
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
 
 	while (!glfwWindowShouldClose(window)) { // Main loop: run until the window should close
         // Render
@@ -118,15 +146,15 @@ int main() {
 
         // Draw Triangle
         glUseProgram(shaderProgram);
-        glBindVertexArray(VAO);
+        glBindVertexArray(triangleVAO);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
         glfwSwapBuffers(window);    // Display the rendered image (double buffering)
 		glfwPollEvents();           // Poll for and process events (like keyboard and mouse input)
     }
 
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
+    glDeleteVertexArrays(1, &triangleVAO);
+    glDeleteBuffers(1, &triangleVAO);
     glDeleteProgram(shaderProgram);
 
     glfwDestroyWindow(window);
