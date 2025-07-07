@@ -3,6 +3,7 @@
 #include "graphics/Renderer2D.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include "graphics/SubTexture2D.h"
 #include <iostream>
 
 
@@ -51,7 +52,50 @@ int main() {
     glm::mat4 view = glm::mat4(1.0f);  // Identity view matrix for no camera movement
     glm::mat4 viewProjection = projection * view;
 
-    Texture2D texture("/GameEngine/assets/test.png");
+    //Texture2D texture("/GameEngine/assets/test.png");
+    Texture2D tilemapTexture("/GameEngine/assets/tileset.png");
+
+
+    // Each tile is 32x32 pixels
+    SubTexture2D grass = SubTexture2D::CreateFromGrid(&tilemapTexture, { 0, 0 }, { 32, 32 });
+    SubTexture2D dirt = SubTexture2D::CreateFromGrid(&tilemapTexture, { 1, 0 }, { 32, 32 });
+
+    const int MAP_WIDTH = 25;
+    const int MAP_HEIGHT = 19;
+
+    int tilemap[MAP_HEIGHT][MAP_WIDTH] = {
+        // row 0 (top)
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+
+        // building cluster (center)
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+
+        // mostly grass again
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+
+        // bottom right buildings
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0 },
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0 },
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0 },
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0 },
+
+        // last few rows grass
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+    };
+
+
+
 
     // Main loop
     while (!glfwWindowShouldClose(window)) {
@@ -65,11 +109,31 @@ int main() {
         // Begin rendering
         renderer.BeginScene(viewProjection);
 
-        // Draw a colored quad
-        renderer.DrawQuad({ 100.0f, 100.0f }, { 200.0f, 150.0f }, { 1.0f, 0.0f, 1.0f, 1.0f });
+        for (int y = 0; y < MAP_HEIGHT; ++y) {
+            for (int x = 0; x < MAP_WIDTH; ++x) {
+                glm::vec2 pos = { x * 32.0f, y * 32.0f };
 
-        // ✅ Draw your textured quad
-        renderer.DrawQuad({ 300.0f, 200.0f }, { 128.0f, 128.0f }, texture);
+                switch (tilemap[y][x]) {
+                case 0:
+                    renderer.DrawQuad(pos, { 32.0f, 32.0f }, *grass.GetTexture(), grass.GetTexCoords());
+                    break;
+                case 1:
+                    renderer.DrawQuad(pos, { 32.0f, 32.0f }, *dirt.GetTexture(), dirt.GetTexCoords());
+                    break;
+                }
+            }
+        }
+
+
+
+
+
+
+        // Draw a colored quad
+        //renderer.DrawQuad({ 100.0f, 100.0f }, { 200.0f, 150.0f }, { 1.0f, 0.0f, 1.0f, 1.0f });
+
+        // Draw your textured quad
+        //renderer.DrawQuad({ 300.0f, 200.0f }, { 128.0f, 128.0f }, texture);
 
         renderer.EndScene();
 

@@ -16,6 +16,8 @@ public:
 
     void DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color);
     void DrawQuad(const glm::vec2& position, const glm::vec2& size, Texture2D& texture);
+    void DrawQuad(const glm::vec2& position, const glm::vec2& size, Texture2D& texture, const glm::vec2 texCoords[4]);
+
 
 
 private:

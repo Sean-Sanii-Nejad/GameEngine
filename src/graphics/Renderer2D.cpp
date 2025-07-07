@@ -112,6 +112,37 @@ void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, Text
     glDeleteBuffers(1, &EBO);
 }
 
+void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, Texture2D& texture, const glm::vec2 texCoords[4]) {
+    float vertices[] = {
+        // x, y, z     r,g,b,a      u, v             useTexture
+        position.x, position.y, 0.0f,     1,1,1,1,   texCoords[0].x, texCoords[0].y, 1.0f,
+        position.x + size.x, position.y, 0.0f, 1,1,1,1, texCoords[1].x, texCoords[1].y, 1.0f,
+        position.x + size.x, position.y + size.y, 0.0f, 1,1,1,1, texCoords[2].x, texCoords[2].y, 1.0f,
+        position.x, position.y + size.y, 0.0f,       1,1,1,1, texCoords[3].x, texCoords[3].y, 1.0f,
+    };
+
+    unsigned int indices[] = { 0, 1, 2, 2, 3, 0 };
+    unsigned int EBO;
+    glGenBuffers(1, &EBO);
+
+    texture.Bind(0);
+    m_Shader->use();
+    m_Shader->setInt("u_Texture", 0);
+
+    glBindVertexArray(m_VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+    glBindVertexArray(0);
+    glDeleteBuffers(1, &EBO);
+}
+
+
 
 
 

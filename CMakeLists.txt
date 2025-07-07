@@ -13,23 +13,29 @@ target_include_directories(glad PUBLIC libs/glad/include)
 # Your executable (GameEngine)
 add_executable(GameEngine
     src/main.cpp
+
+    # Source files
     src/graphics/Shader.cpp
     src/graphics/Renderer2D.cpp
     src/graphics/Texture2D.cpp
-    include/graphics/Renderer2D.h
+    src/graphics/SubTexture2D.cpp
+
+    # Header files
     include/graphics/Shader.h
+    include/graphics/Renderer2D.h
     include/graphics/Texture2D.h
-    include/stb/stb_image.h  # <- Include for stb_image
+    include/graphics/SubTexture2D.h
+    include/stb/stb_image.h
 )
 
-# Include directories for the main project
+# Include directories
 target_include_directories(GameEngine
     PUBLIC
-    include
-    include/stb        # <- Add stb include folder
-    libs/glad/include
-    libs/glfw/include
-    libs/glm
+    include               # Your engine headers
+    include/stb          # For stb_image.h
+    libs/glad/include    # GLAD headers
+    libs/glfw/include    # GLFW headers
+    libs/glm             # GLM math library
 )
 
 # Link libraries
@@ -38,7 +44,7 @@ target_link_libraries(GameEngine
     glfw
 )
 
-# Copy shaders to output directory
+# Copy shaders to build output
 file(GLOB SHADERS "shaders/*.vert" "shaders/*.frag")
 foreach(SHADER ${SHADERS})
     configure_file(${SHADER} ${CMAKE_CURRENT_BINARY_DIR}/shaders/ COPYONLY)
