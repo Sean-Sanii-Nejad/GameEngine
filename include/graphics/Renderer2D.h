@@ -1,5 +1,6 @@
 #include <memory>
 #include "Shader.h"
+#include "Texture2D.h"
 
 class Renderer2D {
 public:
@@ -12,7 +13,10 @@ public:
     void BeginScene(const glm::mat4& viewProj);
     void EndScene();
 
+
     void DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color);
+    void DrawQuad(const glm::vec2& position, const glm::vec2& size, Texture2D& texture);
+
 
 private:
     unsigned int m_VAO = 0;

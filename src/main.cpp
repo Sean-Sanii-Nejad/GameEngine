@@ -1,4 +1,4 @@
-#include <glad/glad.h>
+﻿#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "graphics/Renderer2D.h"
 #include <glm/glm.hpp>
@@ -51,26 +51,28 @@ int main() {
     glm::mat4 view = glm::mat4(1.0f);  // Identity view matrix for no camera movement
     glm::mat4 viewProjection = projection * view;
 
+    Texture2D texture("/GameEngine/assets/test.png");
+
     // Main loop
     while (!glfwWindowShouldClose(window)) {
-        // Input: close on ESC
+        // Input
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
             glfwSetWindowShouldClose(window, true);
 
-        // Clear screen with dark blue-ish color
         glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        // Begin scene with view-projection matrix
+        // Begin rendering
         renderer.BeginScene(viewProjection);
 
-        // Draw a magenta quad at (100, 100), size (200x150)
+        // Draw a colored quad
         renderer.DrawQuad({ 100.0f, 100.0f }, { 200.0f, 150.0f }, { 1.0f, 0.0f, 1.0f, 1.0f });
 
-        // End scene (optional)
+        // ✅ Draw your textured quad
+        renderer.DrawQuad({ 300.0f, 200.0f }, { 128.0f, 128.0f }, texture);
+
         renderer.EndScene();
 
-        // Swap buffers and poll events
         glfwSwapBuffers(window);
         glfwPollEvents();
     }

@@ -15,17 +15,21 @@ add_executable(GameEngine
     src/main.cpp
     src/graphics/Shader.cpp
     src/graphics/Renderer2D.cpp
+    src/graphics/Texture2D.cpp
     include/graphics/Renderer2D.h
     include/graphics/Shader.h
+    include/graphics/Texture2D.h
+    include/stb/stb_image.h  # <- Include for stb_image
 )
 
 # Include directories for the main project
 target_include_directories(GameEngine
     PUBLIC
     include
+    include/stb        # <- Add stb include folder
     libs/glad/include
     libs/glfw/include
-    libs/glm  # ✅ this is the correct level
+    libs/glm
 )
 
 # Link libraries

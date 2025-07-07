@@ -1,9 +1,8 @@
-#include "\GameEngine\include\graphics\Renderer2D.h"
+﻿#include "\GameEngine\include\graphics\Renderer2D.h"
 #include "\GameEngine\include\graphics\Shader.h"
 #include <glad/glad.h>
 
 Renderer2D::Renderer2D() {
-    // Constructor can call Init or leave it explicit
     Init();
 }
 
@@ -18,12 +17,18 @@ void Renderer2D::Init() {
     glBindVertexArray(m_VAO);
     glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
 
-    // Setup vertex attributes (example: position + color)
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)0);
+    // position (3) + color (4) + uv (2) + useTexture (1) = 10 floats
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 10 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 10 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 10 * sizeof(float), (void*)(7 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+    glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 10 * sizeof(float), (void*)(9 * sizeof(float)));
+    glEnableVertexAttribArray(3);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -42,30 +47,27 @@ void Renderer2D::BeginScene(const glm::mat4& viewProj) {
     m_Shader->setMat4("u_ViewProjection", m_ViewProjection);
 }
 
-
 void Renderer2D::EndScene() {
-    // Optional flush or unbind calls
+    // Nothing here yet
 }
 
+// ✅ Colored quad
 void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color) {
     float vertices[] = {
-        // positions           // colors (r,g,b,a)
-        position.x, position.y, 0.0f,   color.r, color.g, color.b, color.a,
-        position.x + size.x, position.y, 0.0f,   color.r, color.g, color.b, color.a,
-        position.x + size.x, position.y + size.y, 0.0f,   color.r, color.g, color.b, color.a,
-        position.x, position.y + size.y, 0.0f,   color.r, color.g, color.b, color.a,
+        // x, y, z     r, g, b, a     u, v     useTexture
+        position.x, position.y, 0.0f,   color.r, color.g, color.b, color.a,   0.0f, 0.0f, 0.0f,
+        position.x + size.x, position.y, 0.0f,  color.r, color.g, color.b, color.a,   1.0f, 0.0f, 0.0f,
+        position.x + size.x, position.y + size.y, 0.0f, color.r, color.g, color.b, color.a, 1.0f, 1.0f, 0.0f,
+        position.x, position.y + size.y, 0.0f,   color.r, color.g, color.b, color.a, 0.0f, 1.0f, 0.0f,
     };
 
-    unsigned int indices[] = {
-        0, 1, 2,
-        2, 3, 0
-    };
-
+    unsigned int indices[] = { 0, 1, 2, 2, 3, 0 };
     unsigned int EBO;
     glGenBuffers(1, &EBO);
 
-    glBindVertexArray(m_VAO);
+    m_Shader->use();
 
+    glBindVertexArray(m_VAO);
     glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
 
@@ -75,9 +77,42 @@ void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, cons
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
     glBindVertexArray(0);
-
     glDeleteBuffers(1, &EBO);
 }
+
+// ✅ Textured quad
+void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, Texture2D& texture) {
+    float vertices[] = {
+        // pos                  color       uv            useTexture
+        position.x, position.y, 0.0f,      1,1,1,1,     1.0f, 1.0f, 1.0f,
+        position.x + size.x, position.y, 0.0f, 1,1,1,1, 0.0f, 1.0f, 1.0f,
+        position.x + size.x, position.y + size.y, 0.0f, 1,1,1,1, 0.0f, 0.0f, 1.0f,
+        position.x, position.y + size.y, 0.0f,         1,1,1,1, 1.0f, 0.0f, 1.0f,
+    };
+
+
+    unsigned int indices[] = { 0, 1, 2, 2, 3, 0 };
+    unsigned int EBO;
+    glGenBuffers(1, &EBO);
+
+    texture.Bind(0);
+    m_Shader->use();
+    m_Shader->setInt("u_Texture", 0);
+
+    glBindVertexArray(m_VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+    glBindVertexArray(0);
+    glDeleteBuffers(1, &EBO);
+}
+
+
 
 
 
