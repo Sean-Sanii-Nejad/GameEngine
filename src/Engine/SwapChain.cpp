@@ -28,12 +28,29 @@ bool SwapChain::init(HWND hwnd, UINT width, UINT height) {
 	if( FAILED(hr)) {
 		return false; // If the swap chain creation fails, return false.
 	}
+
+	ID3D11Texture2D* buffer = nullptr;
+	hr = m_swap_chain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&buffer); // Get the back buffer from the swap chain.
+
+	if (FAILED(hr)) {
+		return false; // If the swap chain creation fails, return false.
+	}
+
+	hr = device->CreateRenderTargetView(buffer, NULL, &m_rtv);
+	buffer->Release(); // Release the buffer after creating the render target view.
+
 	return true;
 }
 
 bool SwapChain::release() {
 	m_swap_chain->Release(); 
 	delete this;
+	return true;
+}
+
+bool SwapChain::present(bool vsync)
+{
+	m_swap_chain->Present(vsync, NULL); 
 	return true;
 }
 

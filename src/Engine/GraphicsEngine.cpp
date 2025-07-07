@@ -1,6 +1,9 @@
 #include <GraphicsEngine.h>
 #include <SwapChain.h>
 #include <DeviceContext.h>
+#include <iostream>
+
+using namespace std;
 
 GraphicsEngine::GraphicsEngine() {
 }
@@ -38,6 +41,7 @@ bool GraphicsEngine::init() {
 	m_dxgi_device->GetParent(_uuidof(IDXGIAdapter), (void**)&m_dxgi_adapter);
 	m_dxgi_adapter->GetParent(_uuidof(IDXGIFactory), (void**)&m_dxgi_factory);
 
+	cout << "Direct3D 11 initialized successfully." << endl;
 	return true;
 }
 
@@ -58,4 +62,8 @@ GraphicsEngine* GraphicsEngine::get() {
 
 SwapChain* GraphicsEngine::createSwapChain(){
 	return new SwapChain(); // Create a new swap chain instance and return it.
+}
+
+DeviceContext* GraphicsEngine::getImmediateContext() {
+	return this->m_imm_device_context; 
 }

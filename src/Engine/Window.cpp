@@ -73,13 +73,14 @@ bool Window::init() {
 bool Window::broadcast()
 {
 	MSG msg;
+
+	window->onUpdate();
+
 	while (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) > 0)
 	{
 		TranslateMessage(&msg); // Translate the message to handle keyboard input.
 		DispatchMessage(&msg); // Dispatch the message to the window procedure.
 	}
-
-	window->onUpdate();
 
 	Sleep(0);
 	return true;

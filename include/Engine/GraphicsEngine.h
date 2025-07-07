@@ -14,6 +14,7 @@ public:
 
 	static GraphicsEngine* get();
 	SwapChain* createSwapChain();
+	DeviceContext* getImmediateContext();
 
 private:
 	DeviceContext* m_imm_device_context = nullptr; // Pointer to the device context instance.
